@@ -15,14 +15,14 @@ public class Computer {
 	private final static int MAX_MEMORY = 50;
 	private final static int MAX_REGISTERS = 8;
 
-	private BitString mRegisters[];
-	private BitString mMemory[];
+	private BitString[] mRegisters;
+	private BitString[] mMemory;
 	private BitString mPC;
 	private BitString mIR;
 	private BitString mCC;
 
 	/**
-	 * Initialize all memory addresses to 0, registers to 0 to 7
+	 * Initialize all memory addresses to 0, registers to 0 through 7
 	 * PC, IR to 16 bit 0s and CC to 000.
 	 */
 	public Computer() {
@@ -140,10 +140,8 @@ public class Computer {
 	 * adding the sign-extended PCoffset9 field to the incremented PC.
 	 */
 	public void executeBranch() {
+		// TODO: Branch Instruction
 		System.out.println("BR"); // remove this print statement
-		
-		// implement the BR instruction here
-		
 	}
 	
 	/**
@@ -162,10 +160,8 @@ public class Computer {
 	 * negative, zero, or positive.
 	 */
 	public void executeAdd() {
+		// TODO: Add Instruction
 		System.out.println("ADD"); // remove this print statement
-		
-		// implement the ADD instruction here
-
 	}
 	
 	/**
@@ -175,10 +171,8 @@ public class Computer {
 	 * then sets CC.
 	 */
 	public void executeLoad() {
+		// TODO: Load Instruction
 		System.out.println("LD");  // remove this print statement
-		
-		// implement the LD instruction here
-
 	}
 	
 	/**
@@ -187,10 +181,8 @@ public class Computer {
 	 * and adding this value to the incremented PC.
 	 */
 	public void executeStore() {
+		// TODO: Store Instruction
 		System.out.println("ST");  // remove this print statement
-		
-		// implement the ST instruction here
-
 	}
 	
 	/**
@@ -210,10 +202,8 @@ public class Computer {
 	 * is negative, zero, or positive.
 	 */
 	public void executeAnd() {
+		// TODO: And Instruction
 		System.out.println("AND");   // remove this print statement
-		
-		// implement the AND instruction here
-		
 	}
 
 	/**
@@ -226,8 +216,7 @@ public class Computer {
 		BitString sourceBS = mIR.substring(7, 3);
 		mRegisters[destBS.getUnsignedValue()] = mRegisters[sourceBS.getUnsignedValue()].copy();
 		mRegisters[destBS.getUnsignedValue()].invert();
-
-		// add code here to set the condition code
+		// TODO: Set condition codes
 	}
 	
 	/**
@@ -239,6 +228,7 @@ public class Computer {
 	 * @return true if this Trap is a HALT command; false otherwise.
 	 */
 	public boolean executeTrap() {
+		// TODO: Trap Instruction
 		boolean halt = true;
 
 		// implement the TRAP instruction here

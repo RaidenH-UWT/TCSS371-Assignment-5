@@ -274,12 +274,14 @@ public class Computer {
 	 * @return true if this Trap is a HALT command; false otherwise.
 	 */
 	public boolean executeTrap() {
-		if (mIR.substring(8, 8).get2sCompValue() == 21) {
+		int vector = mIR.substring(8, 8).get2sCompValue();
+		if (vector == 0x21) {
 			System.out.print((char) mRegisters[0].substring(8, 8).get2sCompValue());
 			return false;
-		} else {
+		} else if (vector == 0x25) {
 			return true;
 		}
+		return false;
 	}
 	
 	/**

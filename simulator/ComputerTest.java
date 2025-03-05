@@ -41,7 +41,7 @@ class ComputerTest {
 			"0001 001 001 1 00011", // ADD R1 + #3
 			"0000 001 0000 00001", // BRp + #1
 			"0001 001 001 1 01000", // ADD R1 + #8
-			"1111 0000 00011001" // HALT
+			"1111 0000 00100101" // HALT
 		};
 
 		myComputer.loadMachineCode(program);
@@ -56,9 +56,9 @@ class ComputerTest {
 	@Test
 	void testExecuteLoad() {
 		String[] program = {
-			"0010000000000001", // LD + #1
-			"1111000000011001", // HALT
-			"0000000001000001" // #65
+			"0010 000 000000001", // LD + #1
+			"1111 0000 00100101", // HALT
+			"0000 0000 0100 0001" // #65
 		};
 
 		myComputer.loadMachineCode(program);
@@ -75,7 +75,7 @@ class ComputerTest {
 		String[] program = {
 			"0001 001 001 1 00111", // ADD R1 + #7
 			"0011 001 000000010", // ST R1 to + #1
-			"1111 0000 00011001" // HALT
+			"1111 0000 00100101" // HALT
 		};
 
 		myComputer.loadMachineCode(program);
@@ -92,7 +92,7 @@ class ComputerTest {
 		String[] program = {
 			"0001 001 001 1 00110", // ADD R1 + #6
 			"0101 001 001 1 11101", // AND R1 * #1
-			"1111 0000 00011001" // HALT
+			"1111 0000 00100101" // HALT
 		};
 
 		myComputer.loadMachineCode(program);
@@ -204,8 +204,8 @@ class ComputerTest {
 	void testLoadTrap() {
 		String[] program = {
 			"0010 000 000000010", // LD + #2
-			"1111 0000 00010101", // OUT
-			"1111 0000 00011001", // HALT
+			"1111 0000 00100001", // OUT 0x21
+			"1111 0000 00100101", // HALT 
 			"0000 0000 0100 0001" // ASCII 'A'
 		};
 

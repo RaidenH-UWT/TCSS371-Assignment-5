@@ -96,8 +96,8 @@ public class Simulator {
 		myComputer.execute();
 		
 		/* Show the final configuration of the computer. */
-		//System.out.println();
-		//myComputer.display();
+		// System.out.println();
+		// myComputer.display();
 	}
 
 }

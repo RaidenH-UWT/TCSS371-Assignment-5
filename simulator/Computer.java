@@ -125,9 +125,6 @@ public class Computer {
 	}
 	
 	
-	// TODO: STORE, AND
-	
-	
 	// The next 6 methods are used to execute the required instructions:
 	// BR, ADD, LD, ST, AND, NOT, TRAP
 	

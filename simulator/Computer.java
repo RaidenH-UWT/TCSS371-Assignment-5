@@ -8,6 +8,7 @@ import java.util.Arrays;
  *  
  * @author mmuppa
  * @author acfowler
+ * @author raidenh
  * @version 4.1
  */
 public class Computer {
@@ -117,13 +118,14 @@ public class Computer {
 		}
 		for (int i = 0; i < theWords.length; i++) {
 			final BitString instruction = new BitString();
-			instruction.setBits(theWords[i].toCharArray());
+			// Added input cleaning to strip spaces. This makes input strings MUCH more readable
+			instruction.setBits(theWords[i].replaceAll(" ", "").toCharArray());
 			loadWord(i, instruction);
 		}
 	}
 	
 	
-	
+	// TODO: STORE, AND
 	
 	
 	// The next 6 methods are used to execute the required instructions:
@@ -140,8 +142,19 @@ public class Computer {
 	 * adding the sign-extended PCoffset9 field to the incremented PC.
 	 */
 	public void executeBranch() {
-		// TODO: Branch Instruction
-		System.out.println("BR"); // remove this print statement
+		char[] condition = mIR.substring(4, 3).getBits();
+		int offset = mIR.substring(7, 9).get2sCompValue();
+
+		if (condition[0] == '1' && mCC.getBits()[0] == '1') {
+			// negative
+			mPC.set2sCompValue(mPC.get2sCompValue() + offset);
+		} else if (condition[1] == '1' && mCC.getBits()[1] == '1') {
+			// zero
+			mPC.set2sCompValue(mPC.get2sCompValue() + offset);
+		} else if (condition[2] == '1' && mCC.getBits()[2] == '1') {
+			// positive
+			mPC.set2sCompValue(mPC.get2sCompValue() + offset);
+		}
 	}
 	
 	/**
@@ -160,29 +173,43 @@ public class Computer {
 	 * negative, zero, or positive.
 	 */
 	public void executeAdd() {
-		// TODO: Add Instruction
-		System.out.println("ADD"); // remove this print statement
+		int dest = mIR.substring(4, 3).getUnsignedValue();
+		int source = mRegisters[mIR.substring(7, 3).getUnsignedValue()].get2sCompValue();
+
+		if (mIR.substring(10, 1).getUnsignedValue() == 1) { // immediate value
+			int immediate = mIR.substring(11, 5).get2sCompValue();
+			mRegisters[dest].set2sCompValue(source + immediate);
+		} else { // register operand
+			int operand = mRegisters[mIR.substring(13, 3).get2sCompValue()].get2sCompValue();
+			mRegisters[dest].set2sCompValue(source + operand);
+		}
+		setConditionCode(((Integer) mRegisters[dest].get2sCompValue()).compareTo(0));
 	}
 	
 	/**
+	 * 0010 000 000000000 (opcode, dr, offset9)
 	 * Performs the load operation by placing the data from PC
 	 * + PC offset9 bits [8:0]
 	 * into DR - bits [11:9]
 	 * then sets CC.
 	 */
 	public void executeLoad() {
-		// TODO: Load Instruction
-		System.out.println("LD");  // remove this print statement
+		int dest = mIR.substring(4, 3).getUnsignedValue();
+		int target = mPC.getUnsignedValue() + mIR.substring(7, 9).get2sCompValue();
+		// set the value of Rdest to the data in memory location [mPC + offset]
+		mRegisters[dest].set2sCompValue(mMemory[target].get2sCompValue());
 	}
 	
 	/**
+	 * 0011 000 000000000 (opcode, SR, offset9)
 	 * Store the contents of the register specified by SR
 	 * in the memory location whose address is computed by sign-extending bits [8:0] to 16 bits
 	 * and adding this value to the incremented PC.
 	 */
 	public void executeStore() {
-		// TODO: Store Instruction
-		System.out.println("ST");  // remove this print statement
+		int source = mIR.substring(4, 3).getUnsignedValue();
+		int offset = mIR.substring(7, 9).get2sCompValue();
+		mMemory[mPC.get2sCompValue() + offset].set2sCompValue(mRegisters[source].get2sCompValue());
 	}
 	
 	/**
@@ -202,8 +229,29 @@ public class Computer {
 	 * is negative, zero, or positive.
 	 */
 	public void executeAnd() {
-		// TODO: And Instruction
-		System.out.println("AND");   // remove this print statement
+		int dest = mIR.substring(4, 3).getUnsignedValue();
+		char[] source = mRegisters[mIR.substring(7, 3).getUnsignedValue()].getBits();
+		char[] comparison;
+		// none of this is good. it's 1am. im tired okay...
+		if (mIR.substring(10, 1).getUnsignedValue() == 1) { // immediate value
+			char[] imm = mIR.substring(11, 5).getBits();
+			comparison = new char[] {
+				imm[0], imm[0], imm[0], imm[0],
+				imm[0], imm[0], imm[0], imm[0],
+				imm[0], imm[0], imm[0], imm[0],
+				imm[1], imm[2], imm[3], imm[4]};
+		} else { // second operand
+			comparison = mRegisters[mIR.substring(13, 3).getUnsignedValue()].getBits();
+		}
+		char[] output = new char[16];
+		for (int i = 0; i < 16; i++) {
+			if (source[i] == '1' && comparison[i] == '1') {
+				output[i] = '1';
+			} else {
+				output[i] = '0';
+			}
+		}
+		mRegisters[dest].setBits(output);
 	}
 
 	/**
@@ -216,10 +264,11 @@ public class Computer {
 		BitString sourceBS = mIR.substring(7, 3);
 		mRegisters[destBS.getUnsignedValue()] = mRegisters[sourceBS.getUnsignedValue()].copy();
 		mRegisters[destBS.getUnsignedValue()].invert();
-		// TODO: Set condition codes
+		setConditionCode(((Integer) destBS.get2sCompValue()).compareTo(0));
 	}
 	
 	/**
+	 * 1111 0000 ******** (trapvect8)
 	 * Executes the trap operation by checking the vector (bits [7:0]
 	 * 
 	 * vector x21 - OUT
@@ -228,15 +277,27 @@ public class Computer {
 	 * @return true if this Trap is a HALT command; false otherwise.
 	 */
 	public boolean executeTrap() {
-		// TODO: Trap Instruction
-		boolean halt = true;
-
-		// implement the TRAP instruction here
-		
-		return halt;
+		if (mIR.substring(8, 8).get2sCompValue() == 21) {
+			System.out.print((char) mRegisters[0].substring(8, 8).get2sCompValue());
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
-	
+	/**
+	 * Private helper method to set the condition code from an integer.
+	 * @param theCode a negative, zero, or positive integer which the condition code will be set by.
+	 */
+	private void setConditionCode(int theCode) {
+		if (theCode == 0) {
+			mCC.setBits(new char[] {'0', '1', '0'});
+		} else if (theCode < 0) {
+			mCC.setBits(new char[] {'1', '0', '0'});
+		} else {
+			mCC.setBits(new char[] {'0', '0', '1'});
+		}
+	}
 
 	/**
 	 * This method will execute all the instructions starting at address 0 

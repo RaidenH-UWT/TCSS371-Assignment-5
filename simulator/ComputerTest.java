@@ -37,7 +37,17 @@ class ComputerTest {
 	 */
 	@Test
 	void testExecuteBranch() {
-		fail("Not yet implemented");
+		String[] program = {
+			"0001 001 001 1 00011", // ADD R1 + #3
+			"0000 001 0000 00001", // BRp + #1
+			"0001 001 001 1 01000", // ADD R1 + #8
+			"1111 0000 00011001" // HALT
+		};
+
+		myComputer.loadMachineCode(program);
+		myComputer.execute();
+
+		assertEquals(4, myComputer.getRegisters()[1].get2sCompValue());
 	}
 
 	/**
@@ -45,7 +55,16 @@ class ComputerTest {
 	 */
 	@Test
 	void testExecuteLoad() {
-		fail("Not yet implemented");
+		String[] program = {
+			"0010000000000001", // LD + #1
+			"1111000000011001", // HALT
+			"0000000001000001" // #65
+		};
+
+		myComputer.loadMachineCode(program);
+		myComputer.execute();
+
+		assertEquals(65, myComputer.getRegisters()[0].get2sCompValue());
 	}
 	
 	/**
@@ -53,7 +72,16 @@ class ComputerTest {
 	 */
 	@Test
 	void testExecuteStore() {
-		fail("Not yet implemented");
+		String[] program = {
+			"0001 001 001 1 00111", // ADD R1 + #7
+			"0011 001 000000010", // ST R1 to + #1
+			"1111 0000 00011001" // HALT
+		};
+
+		myComputer.loadMachineCode(program);
+		myComputer.execute();
+
+		assertEquals(8, myComputer.getMemory()[4].get2sCompValue());
 	}
 
 	/**
@@ -61,7 +89,16 @@ class ComputerTest {
 	 */
 	@Test
 	void testExecuteAnd() {
-		fail("Not yet implemented");
+		String[] program = {
+			"0001 001 001 1 00110", // ADD R1 + #6
+			"0101 001 001 1 11101", // AND R1 * #1
+			"1111 0000 00011001" // HALT
+		};
+
+		myComputer.loadMachineCode(program);
+		myComputer.execute();
+
+		assertEquals(5, myComputer.getRegisters()[1].get2sCompValue());
 	}
 
 	/**
@@ -124,8 +161,8 @@ class ComputerTest {
 	void testExecuteAddR2PlusImm3() {
 		
 		String[] program =
-			{"0001000010100011",  // R0 <- R2 + #3
-		     "1111000000100101"}; // HALT
+			{"0001 000 010100011",  // R0 <- R2 + #3
+		     "1111 000000100101"}; // HALT
 		
 		myComputer.loadMachineCode(program);
 		myComputer.execute();
@@ -144,10 +181,9 @@ class ComputerTest {
 	 */
 	@Test
 	void testExecuteAddR2PlusImmNeg3() {
-		
 		String[] program =
-			{"0001000010111101",  // R0 <- R2 + #-3
-		     "1111000000100101"}; // HALT
+			{"0001 000 010 1 11101",  // R0 <- R2 + #-3
+		     "1111 0000 00100101"}; // HALT
 		
 		myComputer.loadMachineCode(program);
 		myComputer.execute();
@@ -160,4 +196,20 @@ class ComputerTest {
 		assertEquals(expectedCC.get2sCompValue(), myComputer.getCC().get2sCompValue());
 	}
 
+	/**
+	 * This method tests Load as well as both the Trap vectors.
+	 * Should print the character 'A' to the output.
+	 */
+	@Test
+	void testLoadTrap() {
+		String[] program = {
+			"0010 000 000000010", // LD + #2
+			"1111 0000 00010101", // OUT
+			"1111 0000 00011001", // HALT
+			"0000 0000 0100 0001" // ASCII 'A'
+		};
+
+		myComputer.loadMachineCode(program);
+		myComputer.execute();
+	}
 }
